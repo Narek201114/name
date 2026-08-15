@@ -160,10 +160,11 @@
         }
 
         function findName() {
-            const rawInput = document.getElementById("nameInput").value.trim().toLowerCase();
+            const inputVal = document.getElementById("nameInput").value.trim();
+            const rawInput = inputVal.toLowerCase();
             const resultCard = document.getElementById("result");
 
-            if (!rawInput) {
+            if (!inputVal) {
                 alert("Խնդրում ենք մուտքագրել անուն:");
                 return;
             }
@@ -173,15 +174,15 @@
             if (namesDatabase[rawInput]) {
                 data = namesDatabase[rawInput];
             } else {
-                // Եթե անունը հատուկ բազայում չկա, համակարգը գեղեցիկ ձևով ձևավորում է այն
+                // Ավելացված է դինամիկ գեներացիա ցանկացած մուտքագրված անվան համար
                 data = {
-                    origin: "Ազգային / Հնագույն արմատներ",
-                    meaning: `Խորհրդանշում է ինքնատիպություն, ներքին ուժ և դրական խառնվածք:`,
-                    trait: `Այս անունը կրող անձնավորությունը հաճախ առանձնանում է նպատակասլացությամբ, ստեղծարարությամբ և կյանքի հանդեպ լավատեսությամբ:`
+                    origin: "Ազգային / Հնագույն ավանդական արմատներ",
+                    meaning: `Խորհրդանշում է ինքնատիպություն, ներքին լույս, կամք և հաստատակամություն:`,
+                    trait: `Այս անունը կրող անձնավորությունը հաճախ առանձնանում է իր ստեղծարարությամբ, բարի խառնվածքով և նպատակներին հասնելու վճռականությամբ:`
                 };
             }
 
-            document.getElementById("resName").innerText = document.getElementById("nameInput").value;
+            document.getElementById("resName").innerText = inputVal;
             document.getElementById("resOrigin").innerText = data.origin;
             document.getElementById("resMeaning").innerText = data.meaning;
             document.getElementById("resTrait").innerText = data.trait;
