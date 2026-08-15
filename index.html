@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Անվան Իմաստը (Google AI Որոնում)</title>
+    <title>Անվան Իմաստը</title>
     <style>
         :root {
             --primary: #4285f4;
@@ -141,10 +141,10 @@
 
     <div class="container">
         <h1>Անվան Իմաստը</h1>
-        <p class="subtitle">Գրեք անունը, և համացանցի տվյալներով ԱԲ-ն կգրի դրա նշանակությունն ու կարճ պատմությունը:</p>
+        <p class="subtitle">Գրեք անունը, և ԱԲ-ն անմիջապես կգրի դրա նշանակությունն ու պատմությունը:</p>
         
         <div class="input-group">
-            <input type="text" id="nameInput" placeholder="Օրինակ՝ Գարիկ, Վարդան..." onkeypress="checkEnter(event)">
+            <input type="text" id="nameInput" placeholder="Օրինակ՝ Արամ, Անի..." onkeypress="checkEnter(event)">
             <button onclick="searchWithAI()">Որոնել</button>
         </div>
 
@@ -181,17 +181,16 @@
             resultCard.style.display = "none";
             loader.style.display = "block";
 
-           const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-            // Խիստ հրահանգ ենք տալիս ԱԲ-ին՝ սկսել ուղիղ նշանակությունից
-            const promptText = `Որոնիր համացանցում "${name}" անվան մասին և պատասխանը շարադրիր հետևյալ կառուցվածքով և հայերեն լեզվով:
-1. Առաջին նախադասությամբ հստակ գրիր՝ "${name}" անունը նշանակում է [նշանակությունը]:
-2. Դրանից հետո տուր կարճ ու հետաքրքիր տեղեկություն անվան ծագման և նշանակության մասին (օգտագործելով Google-ի տեղեկատվական ակնարկների տվյալները):`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+            const promptText = `Գրիր "${name}" անվան նշանակության և ծագման մասին հետևյալ կառուցվածքով և հայերեն լեզվով.
+1. Առաջին հստակ նախադասությամբ գրիր՝ "${name}" անունը նշանակում է [նշանակությունը]:
+2. Դրանից հետո տուր կարճ ու հետաքրքիր տեղեկություն անվան ծագման և պատմության մասին:`;
 
             const requestBody = {
                 contents: [{
                     parts: [{ text: promptText }]
-                }],
-                tools: [{ "googleSearch": {} }]
+                }]
             };
 
             try {
