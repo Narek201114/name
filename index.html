@@ -3,37 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Անվան Իմաստը (Google Search)</title>
+    <title>Անվան Իմաստը (Google AI Որոնում)</title>
     <style>
-        body { background: #f0f2f5; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { background: #4285f4; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
-        button:hover { background: #357ae8; }
+        :root {
+            --primary: #4285f4;
+            --primary-hover: #357ae8;
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d7e3fc 100%);
+            --card-bg: #ffffff;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #dfe1e5;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.15);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 1s linear infinite;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .result-card h2 {
+            color: #1a73e8;
+            font-size: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-card p {
+            color: var(--text-main);
+            line-height: 1.7;
+            font-size: 15px;
+            white-space: pre-line;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Անվան բացատրություն</h2>
-    <p>Գտեք անվան իմաստը Google-ում:</p>
-    <input type="text" id="nameInput" placeholder="Օրինակ՝ Վարդան">
-    <button onclick="searchName()">Որոնել Google-ում</button>
-</div>
+    <div class="container">
+        <h1>Անվան Իմաստը</h1>
+        <p class="subtitle">Գրեք անունը, և Google-ի որոնման տվյալներով ԱԲ-ն կբերի բացատրությունը:</p>
+        
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Օրինակ՝ Գարիկ, Վարդան..." onkeypress="checkEnter(event)">
+            <button onclick="searchWithAI()">Որոնել</button>
+        </div>
 
-<script>
-    function searchName() {
-        const name = document.getElementById("nameInput").value.trim();
-        if (name) {
-            // Այստեղ կազմում ենք Google-ի որոնման հղումը
-            const url = `https://www.google.com/search?q=անվան+իմաստը+${encodeURIComponent(name)}`;
-            // Բացում ենք նոր պատուհանում
-            window.open(url, '_blank');
-        } else {
-            alert("Խնդրում ենք գրել անուն:");
+        <div id="loader" class="loader"></div>
+
+        <div id="result" class="result-card">
+            <h2 id="resTitle"></h2>
+            <p id="resText"></p>
+        </div>
+    </div>
+
+    <script>
+        // Այստեղ տեղադրիր քո Google AI Studio-ի API բանալին (apiKey)
+        const API_KEY = "YOUR_API_KEY_HERE";
+
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                searchWithAI();
+            }
         }
-    }
-</script>
 
+        async function searchWithAI() {
+            const name = document.getElementById("nameInput").value.trim();
+            const resultCard = document.getElementById("result");
+            const loader = document.getElementById("loader");
+            const resTitle = document.getElementById("resTitle");
+            const resText = document.getElementById("resText");
+
+            if (!name) {
+                alert("Խնդրում ենք մուտքագրել անուն:");
+                return;
+            }
+
+            resultCard.style.display = "none";
+            loader.style.display = "block";
+
+            // Հարցում ենք ուղարկում Gemini-ին՝ միացնելով Google Search գործիքը, 
+            // որպեսզի այն իրական ժամանակում գտնի տեղեկությունը Google-ից
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{ text: `Որոնիր համացանցում և մանրամասն գրիր "${name}" անվան ծագման և նշանակության մասին հայերեն լեզվով (ինչպես Google-ի տեղեկատվական ակնարկներում):` }]
+                }],
+                tools: [{ "googleSearch": {} }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                const answer = data.candidates[0].content.parts[0].text;
+
+                resTitle.innerText = name + " անվան նշանակությունը";
+                resText.innerText = answer;
+
+                loader.style.display = "none";
+                resultCard.style.display = "block";
+
+            } catch (error) {
+                loader.style.display = "none";
+                alert("Սխալ տեղի ունեցավ: Ստուգիր API բանալին:");
+                console.error(error);
+            }
+        }
+    </script>
 </body>
 </html>
