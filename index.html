@@ -3,192 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Անվան Իմաստը և Գաղտնիքը</title>
+    <title>Անվան Իմաստը (Google Search)</title>
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --card-bg: #ffffff;
-            --text-main: #1f2937;
-            --text-muted: #4b5563;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        h1 {
-            color: var(--text-main);
-            margin-bottom: 10px;
-            font-size: 26px;
-        }
-
-        p.subtitle {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--primary);
-        }
-
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .result-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: left;
-            margin-top: 20px;
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .result-card h2 {
-            color: var(--primary);
-            font-size: 22px;
-            margin-bottom: 10px;
-            text-transform: capitalize;
-        }
-
-        .result-card p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-
-        .result-card strong {
-            color: var(--text-main);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        body { background: #f0f2f5; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { background: #4285f4; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background: #357ae8; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Անվան Իմաստը</h1>
-        <p class="subtitle">Մուտքագրեք ցանկացած անուն՝ բացատրությունը իմանալու համար:</p>
-        
-        <div class="input-group">
-            <input type="text" id="nameInput" placeholder="Օրինակ՝ Արմեն, Անի..." onkeypress="checkEnter(event)">
-            <button onclick="findName()">Ուսումնասիրել</button>
-        </div>
+<div class="container">
+    <h2>Անվան բացատրություն</h2>
+    <p>Գտեք անվան իմաստը Google-ում:</p>
+    <input type="text" id="nameInput" placeholder="Օրինակ՝ Վարդան">
+    <button onclick="searchName()">Որոնել Google-ում</button>
+</div>
 
-        <div id="result" class="result-card">
-            <h2 id="resName"></h2>
-            <p><strong>Ծագումը:</strong> <span id="resOrigin"></span></p>
-            <p><strong>Նշանակությունը:</strong> <span id="resMeaning"></span></p>
-            <p><strong>Բնութագիր:</strong> <span id="resTrait"></span></p>
-        </div>
-    </div>
-
-    <script>
-        const namesDatabase = {
-            "արմեն": { origin: "Հայկական", meaning: "Նշանակում է հայ մարդ, կապված Արմենիա երկրանվան հետ:", trait: "Առանձնանում է հավատարմությամբ, աշխատասիրությամբ և հայրենասիրությամբ:" },
-            "արամ": { origin: "Հայկական", meaning: "Վեհ, հզոր, բարձրահասակ կամ հանգիստ, խաղաղ:", trait: "Օժտված է առաջնորդական հատկանիշներով, հանգիստ է և վճռական:" },
-            "անի": { origin: "Հայկական", meaning: "Գեղեցիկ, հիասքանչ, կամ կապված միջնադարյան Անի մայրաքաղաքի հետ:", trait: "Ստեղծագործող է, նպատակասլաց և պատասխանատու:" },
-            "դավիթ": { origin: "Եբրայական", meaning: "Սիրելի, ընտրյալ, բարեկամ:", trait: "Խարիզմատիկ է, վստահելի և հավատարիմ ընկեր:" },
-            "նարեկ": { origin: "Հայկական", meaning: "Կապված Սուրբ Նարեկ գրքի և Նարեվանքի հետ, նշանակում է լույս:", trait: "Խորը մտածող է, ունի վերլուծական միտք և բազմակողմանի տաղանդներ:" },
-            "հայկ": { origin: "Հայկական", meaning: "Հայ նահապետի անունից, նշանակում է հսկա, հայ ժողովրդի նախահայր:", trait: "Անկախ բնավորություն ունի, ազատատמא է և հպարտ:" },
-            "արփի": { origin: "Հայկական", meaning: "Արև, արևի շող, լուսավոր:", trait: "Էներգիայով լի է, լուսավորում է շրջապատը և ունի պայծառ մտածելակերպ:" },
-            "գրիգոր": { origin: "Հունական", meaning: "Արթուն, հսկող, զգոն:", trait: "Պատասխանատու է, խելացի և միշտ պատրաստ դժվարությունները հաղթահարելու:" }
-        };
-
-        function checkEnter(event) {
-            if (event.key === "Enter") {
-                findName();
-            }
+<script>
+    function searchName() {
+        const name = document.getElementById("nameInput").value.trim();
+        if (name) {
+            // Այստեղ կազմում ենք Google-ի որոնման հղումը
+            const url = `https://www.google.com/search?q=անվան+իմաստը+${encodeURIComponent(name)}`;
+            // Բացում ենք նոր պատուհանում
+            window.open(url, '_blank');
+        } else {
+            alert("Խնդրում ենք գրել անուն:");
         }
+    }
+</script>
 
-        function findName() {
-            const inputVal = document.getElementById("nameInput").value.trim();
-            const rawInput = inputVal.toLowerCase();
-            const resultCard = document.getElementById("result");
-
-            if (!inputVal) {
-                alert("Խնդրում ենք մուտքագրել անուն:");
-                return;
-            }
-
-            let data;
-
-            if (namesDatabase[rawInput]) {
-                data = namesDatabase[rawInput];
-            } else {
-                // Ավելացված է դինամիկ գեներացիա ցանկացած մուտքագրված անվան համար
-                data = {
-                    origin: "Ազգային / Հնագույն ավանդական արմատներ",
-                    meaning: `Խորհրդանշում է ինքնատիպություն, ներքին լույս, կամք և հաստատակամություն:`,
-                    trait: `Այս անունը կրող անձնավորությունը հաճախ առանձնանում է իր ստեղծարարությամբ, բարի խառնվածքով և նպատակներին հասնելու վճռականությամբ:`
-                };
-            }
-
-            document.getElementById("resName").innerText = inputVal;
-            document.getElementById("resOrigin").innerText = data.origin;
-            document.getElementById("resMeaning").innerText = data.meaning;
-            document.getElementById("resTrait").innerText = data.trait;
-
-            resultCard.style.display = "block";
-        }
-    </script>
 </body>
 </html>
