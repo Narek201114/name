@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Անվան Իմաստը և Գաղտնիքը (AI-ով)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-main);
+            margin-bottom: 10px;
+            font-size: 26px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .result-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .result-card h2 {
+            color: var(--primary);
+            font-size: 22px;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        .result-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .result-card strong {
+            color: var(--text-main);
+        }
+
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Անվան Իմաստը (AI)</h1>
+        <p class="subtitle">Մուտքագրեք ցանկացած անուն, և արհեստական բանականությունը կբացատրի այն:</p>
+        
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="Օրինակ՝ Արամ, Նարեկ..." onkeypress="checkEnter(event)">
+            <button onclick="findName()">Ուսումնասիրել</button>
+        </div>
+
+        <div id="loader" class="loader"></div>
+
+        <div id="result" class="result-card">
+            <h2 id="resName"></h2>
+            <p><strong>Ծագումը:</strong> <span id="resOrigin"></span></p>
+            <p><strong>Նշանակությունը:</strong> <span id="resMeaning"></span></p>
+            <p><strong>Բնութագիր:</strong> <span id="resTrait"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Տեղադրեք ձեր Google Gemini API բանալին այստեղ 👇
+        const API_KEY = "YOUR_API_KEY_HERE";
+
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                findName();
+            }
+        }
+
+        async function findName() {
+            const name = document.getElementById("nameInput").value.trim();
+            const resultCard = document.getElementById("result");
+            const loader = document.getElementById("loader");
+
+            if (!name) {
+                alert("Խնդրում ենք մուտքագրել անուն:");
+                return;
+            }
+
+            resultCard.style.display = "none";
+            loader.style.display = "block";
+
+            try {
+                const prompt = `Վերլուծիր "${name}" անունը հայերեն լեզվով։ Տուր պատասխանը խիստ հետևյալ JSON ֆորմատով, առանց լրացուցիչ տեքստերի կամ markdown բլոկների (առանց \`\`\`json):
+                {
+                  "origin": "անվան ծագումը",
+                  "meaning": "անվան նշանակությունը",
+                  "trait": "անվան բնութագիրը կամ առանձնահատկությունները"
+                }`;
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const textResponse = data.candidates[0].content.parts[0].text;
+                
+                // Մաքրում ենք պատասխանը հնարավոր markdown նշաններից
+                const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+                const parsedData = JSON.parse(cleanJson);
+
+                document.getElementById("resName").innerText = name;
+                document.getElementById("resOrigin").innerText = parsedData.origin;
+                document.getElementById("resMeaning").innerText = parsedData.meaning;
+                document.getElementById("resTrait").innerText = parsedData.trait;
+
+                loader.style.display = "none";
+                resultCard.style.display = "block";
+
+            } catch (error) {
+                loader.style.display = "none";
+                alert("Սխալ տեղի ունեցավ տվյալների ստացման ժամանակ: Ստուգեք API բանալին կամ փորձեք կրկին:");
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
