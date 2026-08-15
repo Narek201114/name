@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Անվան Իմաստը և Գաղտնիքը (AI-ով)</title>
+    <title>Անվան Իմաստը և Գաղտնիքը</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -116,22 +116,6 @@
             color: var(--text-main);
         }
 
-        .loader {
-            display: none;
-            margin: 20px auto;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -141,15 +125,13 @@
 <body>
 
     <div class="container">
-        <h1>Անվան Իմաստը (AI)</h1>
-        <p class="subtitle">Մուտքագրեք ցանկացած անուն, և արհեստական բանականությունը կբացատրի այն:</p>
+        <h1>Անվան Իմաստը</h1>
+        <p class="subtitle">Մուտքագրեք ցանկացած անուն՝ բացատրությունը իմանալու համար:</p>
         
         <div class="input-group">
-            <input type="text" id="nameInput" placeholder="Օրինակ՝ Արամ, Նարեկ..." onkeypress="checkEnter(event)">
+            <input type="text" id="nameInput" placeholder="Օրինակ՝ Արմեն, Անի..." onkeypress="checkEnter(event)">
             <button onclick="findName()">Ուսումնասիրել</button>
         </div>
-
-        <div id="loader" class="loader"></div>
 
         <div id="result" class="result-card">
             <h2 id="resName"></h2>
@@ -160,8 +142,16 @@
     </div>
 
     <script>
-        // Տեղադրեք ձեր Google Gemini API բանալին այստեղ 👇
-        const API_KEY = "YOUR_API_KEY_HERE";
+        const namesDatabase = {
+            "արմեն": { origin: "Հայկական", meaning: "Նշանակում է հայ մարդ, կապված Արմենիա երկրանվան հետ:", trait: "Առանձնանում է հավատարմությամբ, աշխատասիրությամբ և հայրենասիրությամբ:" },
+            "արամ": { origin: "Հայկական", meaning: "Վեհ, հզոր, բարձրահասակ կամ հանգիստ, խաղաղ:", trait: "Օժտված է առաջնորդական հատկանիշներով, հանգիստ է և վճռական:" },
+            "անի": { origin: "Հայկական", meaning: "Գեղեցիկ, հիասքանչ, կամ կապված միջնադարյան Անի մայրաքաղաքի հետ:", trait: "Ստեղծագործող է, նպատակասլաց և պատասխանատու:" },
+            "դավիթ": { origin: "Եբրայական", meaning: "Սիրելի, ընտրյալ, բարեկամ:", trait: "Խարիզմատիկ է, վստահելի և հավատարիմ ընկեր:" },
+            "նարեկ": { origin: "Հայկական", meaning: "Կապված Սուրբ Նարեկ գրքի և Նարեվանքի հետ, նշանակում է լույս:", trait: "Խորը մտածող է, ունի վերլուծական միտք և բազմակողմանի տաղանդներ:" },
+            "հայկ": { origin: "Հայկական", meaning: "Հայ նահապետի անունից, նշանակում է հսկա, հայ ժողովրդի նախահայր:", trait: "Անկախ բնավորություն ունի, ազատատמא է և հպարտ:" },
+            "արփի": { origin: "Հայկական", meaning: "Արև, արևի շող, լուսավոր:", trait: "Էներգիայով լի է, լուսավորում է շրջապատը և ունի պայծառ մտածելակերպ:" },
+            "գրիգոր": { origin: "Հունական", meaning: "Արթուն, հսկող, զգոն:", trait: "Պատասխանատու է, խելացի և միշտ պատրաստ դժվարությունները հաղթահարելու:" }
+        };
 
         function checkEnter(event) {
             if (event.key === "Enter") {
@@ -169,64 +159,34 @@
             }
         }
 
-        async function findName() {
-            const name = document.getElementById("nameInput").value.trim();
+        function findName() {
+            const rawInput = document.getElementById("nameInput").value.trim().toLowerCase();
             const resultCard = document.getElementById("result");
-            const loader = document.getElementById("loader");
 
-            if (!name) {
+            if (!rawInput) {
                 alert("Խնդրում ենք մուտքագրել անուն:");
                 return;
             }
 
-            resultCard.style.display = "none";
-            loader.style.display = "block";
+            let data;
 
-            try {
-                const prompt = `Վերլուծիր "${name}" անունը հայերեն լեզվով։ Տուր պատասխանը խիստ հետևյալ JSON ֆորմատով, առանց լրացուցիչ տեքստերի կամ markdown բլոկների (առանց \`\`\`json):
-                {
-                  "origin": "անվան ծագումը",
-                  "meaning": "անվան նշանակությունը",
-                  "trait": "անվան բնութագիրը կամ առանձնահատկությունները"
-                }`;
-
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: prompt }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-
-                const textResponse = data.candidates[0].content.parts[0].text;
-                
-                // Մաքրում ենք պատասխանը հնարավոր markdown նշաններից
-                const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-                const parsedData = JSON.parse(cleanJson);
-
-                document.getElementById("resName").innerText = name;
-                document.getElementById("resOrigin").innerText = parsedData.origin;
-                document.getElementById("resMeaning").innerText = parsedData.meaning;
-                document.getElementById("resTrait").innerText = parsedData.trait;
-
-                loader.style.display = "none";
-                resultCard.style.display = "block";
-
-            } catch (error) {
-                loader.style.display = "none";
-                alert("Սխալ տեղի ունեցավ տվյալների ստացման ժամանակ: Ստուգեք API բանալին կամ փորձեք կրկին:");
-                console.error(error);
+            if (namesDatabase[rawInput]) {
+                data = namesDatabase[rawInput];
+            } else {
+                // Եթե անունը հատուկ բազայում չկա, համակարգը գեղեցիկ ձևով ձևավորում է այն
+                data = {
+                    origin: "Ազգային / Հնագույն արմատներ",
+                    meaning: `Խորհրդանշում է ինքնատիպություն, ներքին ուժ և դրական խառնվածք:`,
+                    trait: `Այս անունը կրող անձնավորությունը հաճախ առանձնանում է նպատակասլացությամբ, ստեղծարարությամբ և կյանքի հանդեպ լավատեսությամբ:`
+                };
             }
+
+            document.getElementById("resName").innerText = document.getElementById("nameInput").value;
+            document.getElementById("resOrigin").innerText = data.origin;
+            document.getElementById("resMeaning").innerText = data.meaning;
+            document.getElementById("resTrait").innerText = data.trait;
+
+            resultCard.style.display = "block";
         }
     </script>
 </body>
